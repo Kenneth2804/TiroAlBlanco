@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tiro al blanco</title>
+<style>
+	body{
+		text-align: center;
+	}
+	canvas{
+		border: 2px solid black;
+		display: block;
+		margin: 0 auto;
+		background-color: #f2f2f2;
+			}
+
+		h1{
+			font-family: Arial, sans-serif;
+		}
+		#score{
+			font-family: Arial, sans-serif;
+			font-size: 20px;
+		}
+		#startButton{
+			font-family: Arial, sans-serif;
+			font-size: 18px;
+			padding: 10px 20px;
+			margin-top: 20px;
+			cursor: pointer;
+
+		}
+
+
+</style>
+</head>
+<body>
+<h1>Juego de tiro al blanco</h1>
+<canvas id="gameCanvas" width="800" height="400"></canvas>
+<p>Tiempo restante: <span id="timeLeft">10</span>  Segundos</p>
+<p>Puntuación <span id="score">0</span></p>
+<button id="startButton" onclick="startGame()">Start</button>
+
+<script>
+	const canvas = document.getElementById('gameCanvas');
+	const ctx = canvas.getContext('2d');
+
+	//Variables del juego
+let score = 0;
+const targetRadius = 20;
+let targetX = canvas.width / 2;
+let targetY = canvas.height / 2;
+let isGameRunning = false;
+const gameDuration = 10; //Duración de 10 segundos de juego
+let timeLeft = gameDuration;
+
+
+
+function drawTarget() {
+
+	ctx.beginPath();
+	ctx.arc(targetX, targetY, targetRadius, 0, Math.PI * 2);
+	ctx.fillStyle = 'red'
+	ctx.fill();
+	ctx.closePath();
+
+}
+
+//Función para mover el objetivo de forma Aleatoria
+
+function moveTargetRamdom() {
+
+	targetX = Math.random() * (canvas.width - 2 * targetRadius) + targetRadius;
+	targetY = Math.random() * (canvas.height - 2 * targetRadius) + targetRadius;
+	
+
+}
+
+function updateTimer() {
+		
+		if (timeLeft <= 0) {
+			endGame();
+		}else{
+
+			document.getElementById('timeLeft').textContent = timeLeft;
+			timeLeft--;
+			setTimeout(updateTimer, 1000);
+		}
+}
+
+function shoot() {
+	if (!isGameRunning) return;
+
+	const rect = canvas.getBoundingClientRect();
+	const mouseX = event.clientX - rect.left;
+	const mouseY = event.clientY - rect.top;
+
+	//Calcilar la distancia entre el click y el centro del circulo rojo
+	const distance = Math.sqrt((targetX - mouseX)** 2 + (targetY -mouseY) ** 2);
+
+	//Si el click está dentro del radio del objetivo, o sea sí acetó
+
+	if (distance <= targetRadius) {
+		score++;
+		document.getElementById('score').textContent = score;
+		moveTargetRamdom();
+	} 
+
+}
+
+function startGame() {
+	isGameRunning = true;
+	score = 0;
+	timeLeft = gameDuration;
+	document.getElementById('score').textContent = score;
+	document.getElementById('timeLeft').textContent = timeLeft;
+	document.getElementById('startButton').style.display = 'none';
+	moveTargetRamdom();
+	draw();
+	updateTimer();
+	
+}
+
+function endGame() {
+	isGameRunning = false;
+	alert("Juego terminado cabrón, Tu Puntuación es: " + score);
+	document.getElementById('startButton').style.display = 'block';
+}
+
+function draw() {
+	ctx.clearRect(0,0, canvas.width, canvas.height);
+	drawTarget();
+	if (isGameRunning) {
+		requestAnimationFrame(draw);
+	}
+}
+canvas.addEventListener('click', shoot);
+
+
+</script>
+
+</body>
+</html>
